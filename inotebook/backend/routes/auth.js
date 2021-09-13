@@ -4,9 +4,10 @@ const router = express.Router();
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const fetchuser = require("../middleware/fetchuser");
 const JWT_SECRET = "SIDDHARTH";
 
-//Create a User using: POST "/api/auth/", No login required
+//ROUTE 1: Create a User using: POST "/api/auth/createuser", No login required
 router.post(
   "/createuser",
   [
@@ -54,5 +55,54 @@ router.post(
     }
   }
 );
+
+//ROUTE 2: Authenticate a User using: POST "/api/auth/login", No login required
+router.post("/login", [body("email").isEmail()], async (req, res) => {
+  //if there are errors, return Bad request
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { email, password } = req.body;
+
+  try {
+    let user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(400)
+        .json({ error: "Please, Login with correct user and password." });
+    }
+    const passwordCompare = await bcrypt.compare(password, user.password);
+    if (!passwordCompare) {
+      return res
+        .status(400)
+        .json({ error: "Please, Login with correct user and password." });
+    }
+    const data = {
+      user: {
+        id: user.id,
+      },
+    };
+    const authToken = jwt.sign(data, JWT_SECRET);
+
+    res.json({ authToken });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Some error ocurred!");
+  }
+});
+
+// ROUTE 3: Get Loggeg in user details: POST "/api/auth/getuser" Login Required
+router.post("/getuser", fetchuser, async (req, res) => {
+  try {
+    userId = req.user.id;
+    const user = await User.findById(userId).select("-password");
+    res.send(user);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Some error ocurred!");
+  }
+});
 
 module.exports = router;
