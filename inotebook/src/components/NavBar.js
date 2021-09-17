@@ -42,7 +42,7 @@ const NavBar = () => {
                 className={`nav-link ${
                   location.pathname === "/about" ? "active" : ""
                 }`}
-                to="/"
+                to="/about"
               >
                 About
               </Link>
