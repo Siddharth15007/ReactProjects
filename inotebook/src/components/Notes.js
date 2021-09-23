@@ -1,21 +1,24 @@
 import React, { useContext, useEffect } from "react";
-import NoteContext from "../context/notes/noteContext";
+import noteContext from "../context/notes/noteContext";
+import AddNote from "./AddNote";
 import NoteItem from "./NoteItem";
-
 const Notes = () => {
-  const noteContext = useContext(NoteContext);
-  const { notes } = noteContext;
-
+  const context = useContext(noteContext);
+  const { notes, getNotes, editNote } = context;
+  useEffect(() => {
+    getNotes();
+  }, []);
   return (
-    <div className="row my-3">
-      <h2>You Notes</h2>
-      <div className="container mx-2">
-        {notes.length === 0 && "No notes to display"}
+    <>
+      <AddNote />
+      <div className="row my-3">
+        <h2>Your Notes</h2>
+        {notes.map((note) => {
+          return <NoteItem key={note._id} note={note} />;
+        })}
       </div>
-      {notes.map((note) => {
-        return <NoteItem note={note} />;
-      })}
-    </div>
+    </>
   );
 };
+
 export default Notes;
