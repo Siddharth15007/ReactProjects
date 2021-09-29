@@ -26,14 +26,13 @@ router.post(
     }),
   ],
   async (req, res) => {
-    const { title, description, tag } = req.body;
-    //if there are errors, return Bad request
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
     try {
+      const { title, description, tag } = req.body;
+      //if there are errors, return Bad request
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
       const note = new Note({
         title,
         description,
@@ -41,7 +40,7 @@ router.post(
         user: req.user.id,
       });
       const savedNote = await note.save();
-      res.send(savedNote);
+      res.json(savedNote);
     } catch (error) {
       console.error(error.message);
       res.status(500).send("Some error ocurred!");
